@@ -117,8 +117,8 @@ const char argp_version[] = ##VERSION;	//stringification
 /*	const char *argp_program_bug_address =  "<thodnev@gmail.com>";	*/
 
 /* A documentation string shown (only) in --help */
-static const char *const args_docstring = {
- "An example of simple fs-backed database made to demonstrate the common dev cycle "
+static const char args_docstring[] = {
+ "An example of simple fs-backed database made to demonstrate the common dev cycle"
  "and core concepts of applications development with C.\n\n"
  "Program uses a directory with files, each file contains one database entry. File"
  " names are used as keys for searching (filesystem is used as key->value storage "
@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
 		int lerr = E_OK;
 		switch(qtype) {
 		case Q_HELP:
-			printf(qhelp_docstring);
+			printf("qHelp \n %s",qhelp_docstring);
 			exit(EM_OK);
 			/* break;  -- not needed because of exit*/ 
 		case Q_LIST:;	/* ; empty statement */
@@ -272,8 +272,6 @@ int main(int argc, char *argv[]) {
 			char *fname = m_strjoin("/", args.dir, qval);
 			struct dbitem itm;
 			if ((lerr = item_read(fname, &itm)) != E_OK) {
-				item_remove_bykey(qval, args.dir);
-				printf("DB entry \"%s\" doesn't exist\n", qval);
 				free(fname);
 				err_exit(args.isquiet, lerr);
 			}
@@ -290,6 +288,11 @@ int main(int argc, char *argv[]) {
 		case Q_ADD:;
 			struct dbitem item = make_item(qval);
 			char *fn = m_strjoin("/", args.dir, item.key);
+                        if (item_read(fn, &item) == E_OK) {
+				printf("%s is already exist\n", fn);
+				free(fn);
+				err_exit(args.isquiet, lerr);
+			}
 			if ((lerr = item_write(fn, &item)) != E_OK) {
 				free(fn);
 				err_exit(args.isquiet, lerr);
